@@ -55,11 +55,14 @@ PREPEND;
             file_put_contents($file, $buffer);
         }
 
+        $cliopts = serialize(isset($args['cliopts']) ? $args['cliopts'] : []);
+
         $args = base64_encode(serialize($args));
-        
+
         $script = <<<SCRIPT
 <?php
 namespace Humbug\\Env;
+\$_SERVER['argv'] = unserialize('{$cliopts}');
 require_once '{$humbugBootstrap}';
 use Humbug\Adapter\Phpunit;
 Phpunit::main('{$args}');

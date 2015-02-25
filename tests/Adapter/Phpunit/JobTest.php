@@ -23,6 +23,7 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $expected = <<<EXPECTED
 <?php
 namespace Humbug\\Env;
+\$_SERVER['argv'] = unserialize('a:0:{}');
 require_once '{$bootstrap}';
 use Humbug\Adapter\Phpunit;
 Phpunit::main('YTowOnt9');
