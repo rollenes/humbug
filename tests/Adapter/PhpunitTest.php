@@ -277,7 +277,9 @@ OUTPUT;
     {
         return [
             [__DIR__ . '/_files/regression/wildcard-dirs'],
-            ['tests/Adapter/_files/regression/wildcard-dirs']
+            ['tests/Adapter/_files/regression/wildcard-dirs'],
+
+            [__DIR__ . '/_files/regression/server-argv']
         ];
     }
 }
