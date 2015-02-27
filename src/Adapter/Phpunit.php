@@ -17,6 +17,7 @@ use Humbug\Adapter\Phpunit\Job;
 use Humbug\Utility\CoverageData;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\PhpProcess;
+use Symfony\Component\Process\Process;
 
 class Phpunit extends AdapterAbstract
 {
@@ -90,7 +91,7 @@ class Phpunit extends AdapterAbstract
         /**
          * Initial command is expected, of course.
          */
-        array_unshift($jobopts['cliopts'], 'phpunit');
+        array_unshift($jobopts['cliopts'], '/home/rolen/php/humbug/vendor/bin/phpunit');
 
         /**
          * Log the first run so we can analyse test times to make future
@@ -113,14 +114,17 @@ class Phpunit extends AdapterAbstract
             $interceptFile
         );
 
-        $process = new PhpProcess($job, null, $_ENV);
-        if (!defined('PHP_WINDOWS_VERSION_BUILD')) {
-            $executableFinder = new PhpExecutableFinder();
-            $php = $executableFinder->find();
-            if ($php !== false) {
-                $process->setCommandLine('exec '.$php);
-            }
-        }
+
+        $process = new Process(implode(' ', $jobopts['cliopts']), $jobopts['testdir'], $_ENV);
+
+//        $process = new PhpProcess($job, null, $_ENV);
+//        if (!defined('PHP_WINDOWS_VERSION_BUILD')) {
+//            $executableFinder = new PhpExecutableFinder();
+//            $php = $executableFinder->find();
+//            if ($php !== false) {
+//                $process->setCommandLine('exec '.$php);
+//            }
+//        }
         
         $process->setTimeout($timeout);
 

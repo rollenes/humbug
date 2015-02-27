@@ -34,6 +34,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\PhpProcess;
+use Symfony\Component\Process\Process;
 
 class Humbug extends Command
 {
@@ -103,7 +104,7 @@ class Humbug extends Command
 
         $process = $testFrameworkAdapter->getProcess($container, true);
 
-        $hasFailure = $this->performInitailTestsRun($process, $testFrameworkAdapter, $progressBar);
+        $hasFailure = $this->performInitialTestsRun($process, $testFrameworkAdapter, $progressBar);
 
         if (!$input->getOption('no-progress-bar')) {
             $progressBar->finish();
@@ -204,6 +205,9 @@ class Humbug extends Command
 
             foreach ($batches as $batch) {
                 $mutants = [];
+                /**
+                 * @var Process[]
+                 */
                 $processes = [];
                 // Being utterly paranoid, track index using $tracker explicitly
                 // to ensure process->mutation indices are linked for reporting.
@@ -238,7 +242,14 @@ class Humbug extends Command
                 $group->run();
 
                 foreach ($mutants as $tracker => $mutant) {
+                    /**
+                     * @var $process Process
+                     */
                     $process = $mutant->getProcess();
+
+                    $mutantExitCode = $process->getExitCode();
+
+                    $isSuccessful = in_array($mutantExitCode, [0, 1, 2]);
 
                     /**
                      * Define the result for each process
@@ -531,8 +542,8 @@ class Humbug extends Command
         return $out;
     }
 
-    private function performInitailTestsRun(
-        PhpProcess $process,
+    private function performInitialTestsRun(
+        Process $process,
         AdapterAbstract $testFrameworkAdapter,
         ProgressBar $progressBar = null
     ) {
