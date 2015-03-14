@@ -27,13 +27,10 @@ use Humbug\Exception\NoCoveringTestsException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\ArrayInput as EmptyInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\PhpProcess;
 use Symfony\Component\Process\Process;
 
 class Humbug extends Command
@@ -256,7 +253,7 @@ class Humbug extends Command
                      */
                     $result = [
                         'passed'     => $container->getAdapter()->ok($process->getOutput()),
-                        'successful' => $process->isSuccessful(),
+                        'successful' => $isSuccessful,
                         'timeout'    => $group->timedOut($tracker),
                         'stderr'     => $process->getErrorOutput(),
                     ];
@@ -270,7 +267,15 @@ class Humbug extends Command
                     $renderer->renderProgressMark($result, count($mutables), $i);
                     $this->logText($renderer);
 
-                    $collector->collect($mutant, $result);
+                    if ($result['timeout'] === true) {
+                        $collector->collectTimeout($mutant);
+                    } elseif ($result['successful'] === false) {
+                        $collector->collectError($mutant);
+                    } elseif ($result['passed'] === false) {
+                        $collector->collectKilled($mutant);
+                    } else {
+                        $collector->collectEscaped($mutant);
+                    }
                 }
             }
 

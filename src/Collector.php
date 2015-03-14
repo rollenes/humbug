@@ -13,21 +13,10 @@ namespace Humbug;
  */
 class Collector
 {
-
-    /**
-     * @var int Total mutant count collected
-     */
-    private $totalCount = 0;
-
     /**
      * @var int Count of mutants not covered by a test case.
      */
     private $shadowCount = 0;
-
-    /**
-     * @var int Count of mutants killed by a test case.
-     */
-    private $killedCount = 0;
 
     /**
      * @var Mutant[] Mutants killed by a test case.
@@ -35,19 +24,9 @@ class Collector
     private $killed = [];
 
     /**
-     * @var int Count of mutants that timed out.
-     */
-    private $timeoutCount = 0;
-
-    /**
      * @var Mutant[] Mutants that resulted in a timeout.
      */
     private $timeouts = [];
-
-    /**
-     * @var int Count of mutants that triggered an error.
-     */
-    private $errorCount = 0;
 
     /**
      * @var Mutant[] Mutants that triggered an error.
@@ -55,47 +34,48 @@ class Collector
     private $errors = [];
 
     /**
-     * @var int Count of mutants that escaped tests.
-     */
-    private $escapeCount = 0;
-
-    /**
      * @var Mutant[] Mutants that escaped tests.
      */
     private $escaped = [];
-
-    /**
-     * Collects a result associated with a mutant.
-     *
-     * @param Mutant $mutant
-     * @param array $result
-     */
-    public function collect(Mutant $mutant, array $result)
-    {
-        $this->totalCount++;
-
-        if ($result['timeout'] === true) {
-            $this->timeoutCount++;
-            $this->timeouts[] = $mutant;
-        } elseif ($result['successful'] === false) {
-            $this->errorCount++;
-            $this->errors[] = $mutant;
-        } elseif ($result['passed'] === false) {
-            $this->killedCount++;
-            $this->killed[] = $mutant;
-        } else {
-            $this->escapeCount++;
-            $this->escaped[] = $mutant;
-        }
-    }
 
     /**
      * Collects a shadow mutant.
      */
     public function collectShadow()
     {
-        $this->totalCount++;
         $this->shadowCount++;
+    }
+
+    /**
+     * @param Mutant $mutant
+     */
+    public function collectEscaped(Mutant $mutant)
+    {
+        $this->escaped[] = $mutant;
+    }
+
+    /**
+     * @param Mutant $mutant
+     */
+    public function collectKilled(Mutant $mutant)
+    {
+        $this->killed[] = $mutant;
+    }
+
+    /**
+     * @param Mutant $mutant
+     */
+    public function collectError(Mutant $mutant)
+    {
+        $this->errors[] = $mutant;
+    }
+
+    /**
+     * @param Mutant $mutant
+     */
+    public function collectTimeout(Mutant $mutant)
+    {
+        $this->timeouts[] = $mutant;
     }
 
     /**
@@ -103,7 +83,12 @@ class Collector
      */
     public function getTotalCount()
     {
-        return $this->totalCount;
+        return
+            $this->getErrorCount() +
+            $this->getEscapeCount() +
+            $this->getKilledCount() +
+            $this->getShadowCount() +
+            $this->getTimeoutCount();
     }
 
     /**
@@ -111,7 +96,7 @@ class Collector
      */
     public function getMeasurableTotal()
     {
-        return $this->totalCount - $this->shadowCount;
+        return $this->getTotalCount() - $this->getShadowCount();
     }
 
     /**
@@ -119,7 +104,10 @@ class Collector
      */
     public function getVanquishedTotal()
     {
-        return $this->killedCount + $this->timeoutCount + $this->errorCount;
+        return
+            $this->getKilledCount() +
+            $this->getTimeoutCount() +
+            $this->getErrorCount();
     }
 
     /**
@@ -135,7 +123,7 @@ class Collector
      */
     public function getKilledCount()
     {
-        return $this->killedCount;
+        return count($this->killed);
     }
 
     /**
@@ -151,7 +139,7 @@ class Collector
      */
     public function getTimeoutCount()
     {
-        return $this->timeoutCount;
+        return count($this->timeouts);
     }
 
     /**
@@ -167,7 +155,7 @@ class Collector
      */
     public function getErrorCount()
     {
-        return $this->errorCount;
+        return count($this->errors);
     }
 
     /**
@@ -183,7 +171,7 @@ class Collector
      */
     public function getEscapeCount()
     {
-        return $this->escapeCount;
+        return count($this->escaped);
     }
 
     /**
@@ -196,6 +184,8 @@ class Collector
 
     /**
      * Returns all collected mutants as arrays, grouped by their result status.
+     *
+     * @todo Move it from here to better place
      *
      * @return array
      */
