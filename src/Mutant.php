@@ -13,7 +13,7 @@ namespace Humbug;
 use Humbug\Utility\CoverageData;
 use Humbug\Utility\Diff;
 use Humbug\Utility\Tokenizer;
-use Symfony\Component\Process\PhpProcess;
+use Symfony\Component\Process\Process;
 
 class Mutant
 {
@@ -44,7 +44,7 @@ class Mutant
     protected $diff;
 
     /**
-     * @var PhpProcess
+     * @var Process
      */
     protected $process;
 
@@ -77,7 +77,7 @@ class Mutant
      * Return the test process
      * If it doesn't exist it will be created
      *
-     * @return \Symfony\Component\Process\PhpProcess
+     * @return Process
      */
     public function getProcess()
     {

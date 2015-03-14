@@ -15,8 +15,6 @@ use Humbug\Container;
 use Humbug\Adapter\Phpunit\XmlConfiguration;
 use Humbug\Adapter\Phpunit\Job;
 use Humbug\Utility\CoverageData;
-use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Process\PhpProcess;
 use Symfony\Component\Process\Process;
 
 class Phpunit extends AdapterAbstract
@@ -34,7 +32,7 @@ class Phpunit extends AdapterAbstract
      * @param   null|string       $interceptFile
      * @param   null|string       $mutantFile
      * @param   array             $testSuites
-     * @return  \Symfony\Component\Process\PhpProcess
+     * @return  \Symfony\Component\Process\Process
      */
     public function getProcess(
         Container $container,
@@ -107,65 +105,18 @@ class Phpunit extends AdapterAbstract
             $timeout = $container->getTimeout();
         }
 
-        $job = Job::generate(
+        Job::generate(
             $mutantFile,
             $jobopts,
             $container->getBootstrap(),
             $interceptFile
         );
 
-
         $process = new Process(implode(' ', $jobopts['cliopts']), $jobopts['testdir'], $_ENV);
-
-//        $process = new PhpProcess($job, null, $_ENV);
-//        if (!defined('PHP_WINDOWS_VERSION_BUILD')) {
-//            $executableFinder = new PhpExecutableFinder();
-//            $php = $executableFinder->find();
-//            if ($php !== false) {
-//                $process->setCommandLine('exec '.$php);
-//            }
-//        }
         
         $process->setTimeout($timeout);
 
         return $process;
-    }
-
-    /**
-     * Executed in a separate process spawned from the execute() method above.
-     *
-     * Uses an instance of PHPUnit_TextUI_Command to execute the PHPUnit
-     * tests and simulate any Humbug supported command line options suitable
-     * for PHPUnit. At present, we merely dissect a generic 'options' string
-     * equivalant to anything typed into a console after a normal 'phpunit'
-     * command. The adapter captures the TextUI output for further processing.
-     *
-     * @param string $arguments PHP serialised set of arguments to pass to PHPUnit
-     * @return void
-     */
-    public static function main($arguments)
-    {
-        $arguments = unserialize(base64_decode($arguments));
-
-        /**
-         * Switch working directory to tests (if required) and execute the test suite
-         */
-        $originalWorkingDir = getcwd();
-        if (isset($arguments['testdir']) && !empty($arguments['testdir'])) {
-            chdir($arguments['testdir']);
-        }
-        $command = new \PHPUnit_TextUI_Command;
-        try {
-            $command->run($arguments['cliopts'], false);
-            if (getcwd() !== $originalWorkingDir) {
-                chdir($originalWorkingDir);
-            }
-        } catch (\Exception $e) {
-            if (getcwd() !== $originalWorkingDir) {
-                chdir($originalWorkingDir);
-            }
-            throw $e;
-        }
     }
 
     /**

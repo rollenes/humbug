@@ -260,10 +260,6 @@ class Humbug extends Command
 
                     $process->clearOutput();
 
-                    /**
-                     * Handle the defined result for each process
-                     */
-
                     $renderer->renderProgressMark($result, count($mutables), $i);
                     $this->logText($renderer);
 

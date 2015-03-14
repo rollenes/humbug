@@ -17,6 +17,7 @@ use Humbug\Adapter\AdapterAbstract;
 use Humbug\Adapter\Phpunit;
 use Humbug\ProcessRunner;
 use Symfony\Component\Process\PhpProcess;
+use Symfony\Component\Process\Process;
 
 class ProcessRunnerTest extends \PHPUnit_Framework_TestCase
 {
@@ -84,7 +85,7 @@ echo "ok 80 - Humbug\Test\Mutator\ConditionalBoundary\LessThanTest::testReturnsT
         return $process;
     }
 
-    private function runProcess(PhpProcess $process, $onProgressCallback = null)
+    private function runProcess(Process $process, $onProgressCallback = null)
     {
         return $this->processRunner->run($process, $this->testFrameworkAdapter, $onProgressCallback);
     }

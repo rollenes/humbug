@@ -54,16 +54,5 @@ PREPEND;
             }
             file_put_contents($file, $buffer);
         }
-
-        $args = base64_encode(serialize($args));
-        
-        $script = <<<SCRIPT
-<?php
-namespace Humbug\\Env;
-require_once '{$humbugBootstrap}';
-use Humbug\Adapter\Phpunit;
-Phpunit::main('{$args}');
-SCRIPT;
-        return $script;
     }
 }
